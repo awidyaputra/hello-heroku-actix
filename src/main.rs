@@ -1,4 +1,5 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_cors::Cors;
+use actix_web::{get, http, post, web, App, HttpResponse, HttpServer, Responder};
 use std::env;
 
 #[get("/")]
@@ -19,7 +20,13 @@ async fn manual_hello() -> impl Responder {
 async fn main() -> std::io::Result<()> {
     let port = env::var("PORT").unwrap_or("3000".to_string());
     HttpServer::new(|| {
+        let cors = Cors::default()
+            .allowed_origin("https://stoic-booth-3c5113.netlify.app/")
+            .allowed_methods(vec!["GET", "POST"])
+            .allowed_header(http::header::CONTENT_TYPE);
+
         App::new()
+            .wrap(cors)
             .service(hello)
             .service(echo)
             .route("/hey", web::get().to(manual_hello))
